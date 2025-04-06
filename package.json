@@ -1,0 +1,14 @@
+{
+  "name": "perplexity-tab-query",
+  "version": "1.0.0",
+  "description": "Query Perplexity AI with context from your open tabs",
+  "main": "background.js",
+  "scripts": {
+  },
+  "keywords": [
+    "chrome-extension",
+    "perplexity"
+  ],
+  "author": "",
+  "license": "ISC"
+}

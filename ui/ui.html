@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Perplexity Tab Query</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="container">
+    <h1 class="title">Query with Tab Context</h1>
+
+    <div class="query-section">
+      <textarea id="queryInput" placeholder="Enter your query here..." rows="4"></textarea>
+      <div id="queryValidation" class="validation-message error"></div> <!-- Start with error class for consistency -->
+
+      <div class="button-row">
+        <button id="submitButton" disabled>Send to Perplexity</button> <!-- Start disabled -->
+        <div id="rateLimitInfo" class="rate-limit-info">Loading...</div>
+      </div>
+    </div>
+
+    <div id="statusContainer" class="status-container">
+      <div id="statusMessage" class="status-message"></div>
+      <div id="spinner" class="spinner hidden"></div> <!-- Spinner initially hidden -->
+    </div>
+
+    <!-- Initially hidden sections -->
+    <div id="urlListContainer" class="url-list-container hidden">
+      <h3 class="section-title">Using these tabs (<span id="tabCount">0</span>):</h3>
+      <ul id="urlListItems" class="url-list-items"></ul>
+    </div>
+
+    <div id="resultContainer" class="result-container hidden">
+      <h3 class="section-title">Perplexity Response: <button id="copyResponseButton" class="copy-button" title="Copy response to clipboard" style="display: none;">Copy</button></h3>
+      <div id="resultContent" class="result-content"></div>
+    </div>
+    <!-- End hidden sections -->
+
+    <!-- Embedded Settings Form -->
+    <div class="settings-section">
+      <h2>Settings</h2>
+
+      <div class="option-group">
+        <label for="apiKey">Perplexity API Key:</label>
+        <input type="password" id="apiKey" placeholder="Enter your API key (e.g., pplx-...)">
+        <div class="validation-message error" id="apiKeyValidation"></div>
+      </div>
+
+      <div class="option-group">
+        <label for="rateLimit">Rate Limit (requests per hour):</label>
+        <input type="number" id="rateLimit" min="1" max="100" value="10">
+        <p class="help-text">How many queries can be sent per hour (1-100).</p>
+      </div>
+
+      <div class="option-group">
+        <label for="maxTabs">Maximum tabs to include:</label>
+        <input type="number" id="maxTabs" min="1" max="50" value="10">
+        <p class="help-text">Limit the number of tabs sent as context (1-50).</p>
+      </div>
+
+      <div class="buttons">
+        <button id="saveButton">Save Settings</button>
+        <div id="status" class="status-message"></div>
+      </div>
+    </div>
+    <!-- End Embedded Settings Form -->
+
+    <div class="footer">
+      <a href="#" id="toggleUrlsLink" title="Show/Hide the list of tabs used in the last query">Show Used Tabs</a>
+    </div>
+  </div>
+
+  <!-- Load utility scripts first -->
+  <script src="../utils/validation.js"></script>
+  <script src="../utils/rate-limiter.js"></script>
+  <!-- Load popup script last -->
+  <script src="ui.js"></script>
+</body>
+</html>

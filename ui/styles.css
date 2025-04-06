@@ -1,0 +1,312 @@
+/* General Styles */
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  margin: 0;
+  padding: 0; /* Remove padding */
+  background-color: #f8f9fa; /* Lighter grey */
+  color: #202124; /* Near black */
+  width: 450px; /* Fixed width for popup */
+  box-sizing: border-box;
+}
+
+.container {
+  padding: 16px 20px;
+  box-sizing: border-box;
+}
+
+/* Title */
+.title { /* Changed from h1 for more specific targeting */
+  margin-top: 0;
+  margin-bottom: 16px;
+  font-size: 18px; /* Slightly smaller */
+  font-weight: 500;
+  color: #1a73e8; /* Google Blue */
+  text-align: center;
+}
+
+/* Query Section */
+.query-section {
+  margin-bottom: 16px;
+}
+
+textarea {
+  width: 100%;
+  padding: 10px 12px;
+  box-sizing: border-box;
+  border: 1px solid #dadce0; /* Google Input Border */
+  border-radius: 4px;
+  resize: vertical; /* Allow vertical resize */
+  min-height: 60px; /* Minimum height */
+  font-family: inherit;
+  font-size: 14px;
+  margin-bottom: 4px; /* Space before validation message */
+  transition: border-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+}
+
+textarea:focus {
+  outline: none;
+  border-color: #1a73e8;
+  box-shadow: 0 0 0 2px rgba(26, 115, 232, 0.2);
+}
+
+.validation-message {
+  font-size: 12px;
+  margin-top: 0px; /* Adjusted */
+  min-height: 18px; /* Reserve space */
+}
+
+.validation-message.error {
+ color: #d93025; /* Google Red */
+}
+
+/* Button Row */
+.button-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 10px;
+}
+
+button {
+  background-color: #1a73e8;
+  color: white;
+  border: none;
+  padding: 9px 16px; /* Slightly smaller padding */
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: 500;
+  font-size: 14px;
+  transition: background-color 0.2s, box-shadow 0.2s;
+  box-shadow: 0 1px 2px 0 rgba(60,64,67,0.3), 0 1px 3px 1px rgba(60,64,67,0.15);
+}
+
+button:hover:not(:disabled) {
+  background-color: #1765cc;
+  box-shadow: 0 1px 3px 0 rgba(60,64,67,0.3), 0 4px 8px 3px rgba(60,64,67,0.15);
+}
+
+button:active:not(:disabled) {
+  background-color: #155bb5;
+}
+
+button:disabled {
+  background-color: #f1f3f4; /* Google Disabled Grey */
+  color: #9aa0a6; /* Darker disabled text */
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+.rate-limit-info {
+  font-size: 12px;
+  color: #5f6368; /* Google Medium Grey */
+}
+
+.rate-limit-info.warning {
+    color: #e37400; /* Amber/Orange for warning */
+    font-weight: 500;
+}
+
+/* Status Container */
+.status-container {
+  display: flex;
+  align-items: center;
+  margin-bottom: 12px; /* Reduced margin */
+  min-height: 24px; /* Ensure consistent height */
+}
+
+.status-message {
+  flex-grow: 1;
+  font-size: 13px; /* Slightly smaller */
+  padding-right: 10px; /* Space before spinner */
+}
+
+/* Status message types */
+.status-message.error { color: #d93025; font-weight: 500; }
+.status-message.warning { color: #e37400; font-weight: 500; }
+.status-message.success { color: #188038; font-weight: 500; }
+.status-message.info { color: #5f6368; } /* Default/info color */
+
+
+/* Spinner */
+.spinner {
+  flex-shrink: 0; /* Prevent spinner from shrinking */
+  width: 18px; /* Smaller spinner */
+  height: 18px;
+  border: 2px solid rgba(26,115,232,0.2);
+  border-top-color: #1a73e8;
+  border-radius: 50%;
+  animation: spin 0.8s infinite linear;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Section Titles */
+.section-title { /* Shared style for URL list and Result titles */
+  margin-top: 0;
+  margin-bottom: 8px;
+  font-size: 15px; /* Slightly smaller */
+  font-weight: 500;
+  color: #1a73e8;
+  border-bottom: 1px solid #e8eaed; /* Light separator */
+  padding-bottom: 4px;
+}
+
+/* URL List */
+.url-list-container { /* Container for the URL list section */
+  background-color: #ffffff;
+  border: 1px solid #dadce0;
+  border-radius: 4px;
+  padding: 12px;
+  margin-bottom: 16px;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+}
+
+.url-list-items { /* The actual UL element */
+  max-height: 120px; /* Reduced max height */
+  overflow-y: auto;
+  margin: 0;
+  padding-left: 20px; /* Standard list indentation */
+  list-style-type: disc; /* Ensure bullets are visible */
+}
+
+.url-list-items li {
+  font-size: 12px;
+  margin-bottom: 5px;
+  word-break: break-all; /* Prevent long URLs from overflowing */
+  color: #3c4043;
+}
+
+/* Result Container */
+.result-container {
+  background-color: #ffffff;
+  border: 1px solid #dadce0;
+  border-radius: 4px;
+  padding: 12px;
+  margin-bottom: 16px;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+}
+
+.result-content {
+  max-height: 200px; /* Reduced max height */
+  overflow-y: auto;
+  font-size: 14px;
+  line-height: 1.5;
+  white-space: pre-wrap; /* Preserve whitespace and wrap */
+  word-wrap: break-word; /* Ensure long words break */
+  color: #3c4043;
+}
+
+/* Footer */
+.footer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 12px;
+  color: #5f6368;
+  margin-top: 16px;
+  border-top: 1px solid #e8eaed; /* Separator line */
+  padding-top: 10px;
+}
+
+.footer a {
+  color: #1a73e8;
+  text-decoration: none;
+  margin: 0 8px;
+  padding: 2px 4px;
+  border-radius: 3px;
+  transition: background-color 0.2s;
+}
+
+.footer a:hover {
+  text-decoration: none;
+  background-color: rgba(26, 115, 232, 0.1); /* Light blue background on hover */
+}
+
+/* Utility Classes */
+.hidden {
+  display: none !important; /* Use important to override potential conflicts */
+}
+
+/* Settings Form Styles */
+.option-group {
+  margin-bottom: 12px;
+}
+
+.option-group label {
+  display: block;
+  font-size: 13px;
+  margin-bottom: 4px;
+  font-weight: 500;
+}
+
+.option-group input[type="password"],
+.option-group input[type="number"] {
+  width: 100%;
+  padding: 8px 10px;
+  box-sizing: border-box;
+  border: 1px solid #dadce0;
+  border-radius: 4px;
+  font-family: inherit;
+  font-size: 14px;
+  transition: border-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+}
+
+.option-group input:focus {
+  outline: none;
+  border-color: #1a73e8;
+  box-shadow: 0 0 0 2px rgba(26, 115, 232, 0.2);
+}
+
+.option-group .help-text {
+  font-size: 12px;
+  color: #5f6368;
+  margin-top: 2px;
+}
+
+.buttons {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.buttons button {
+  flex-shrink: 0;
+}
+
+.buttons .status-message {
+  flex-grow: 1;
+  font-size: 13px;
+}
+
+/* Copy Button Specific Styles */
+.copy-button {
+  background: none; /* Remove default background */
+  border: none; /* Remove default border */
+  color: #1a73e8; /* Match link color */
+  cursor: pointer;
+  font-size: 12px; /* Smaller font */
+  padding: 2px 4px; /* Minimal padding */
+  margin-left: 8px; /* Space from title */
+  vertical-align: middle; /* Align with text */
+  border-radius: 3px;
+  transition: background-color 0.2s, color 0.2s;
+  box-shadow: none; /* Remove default button shadow */
+}
+
+.copy-button:hover:not(:disabled) {
+  background-color: rgba(26, 115, 232, 0.1); /* Light blue background on hover */
+  color: #1765cc; /* Darker blue on hover */
+}
+
+.copy-button:active:not(:disabled) {
+  background-color: rgba(26, 115, 232, 0.2); /* Slightly darker background on click */
+}
+
+.copy-button:disabled {
+  color: #9aa0a6; /* Disabled text color */
+  cursor: default;
+  background-color: transparent; /* Ensure no background when disabled */
+}

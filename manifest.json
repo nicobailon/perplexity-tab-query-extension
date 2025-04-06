@@ -1,0 +1,20 @@
+{
+  "manifest_version": 3,
+  "name": "Perplexity Tab Query",
+  "version": "1.0",
+  "description": "Query Perplexity AI with context from your open tabs",
+  "permissions": ["tabs", "storage"],
+  "host_permissions": [
+    "https://api.perplexity.ai/*"
+  ],
+  "action": {
+    "default_popup": "ui/ui.html"
+  },
+  "background": {
+    "service_worker": "background.js",
+    "type": "module"
+  },
+  "content_security_policy": {
+    "extension_pages": "script-src 'self'; object-src 'self'"
+  }
+}
