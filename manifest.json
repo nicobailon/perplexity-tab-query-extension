@@ -3,7 +3,7 @@
   "name": "Perplexity Tab Query",
   "version": "1.0",
   "description": "Query Perplexity AI with context from your open tabs",
-  "permissions": ["tabs", "storage"],
+  "permissions": ["tabs", "storage", "activeTab", "scripting", "offscreen"],
   "host_permissions": [
     "https://api.perplexity.ai/*"
   ],
@@ -14,7 +14,23 @@
     "service_worker": "background.js",
     "type": "module"
   },
+  "content_scripts": [
+    {
+      "matches": ["http://*/*", "https://*/*"],
+      "js": ["utils/content-extractor.js"],
+      "run_at": "document_idle"
+    }
+  ],
   "content_security_policy": {
     "extension_pages": "script-src 'self'; object-src 'self'"
-  }
+  },
+  "web_accessible_resources": [
+    {
+      "resources": ["node_modules/@mozilla/readability/Readability.js"],
+      "matches": ["<all_urls>"]
+    }
+  ],
+  "trial_tokens": [
+    "AiMPyLKKR6JOE3xU+LK3RkXtpJ/aFYqKxHnUL0cgKQdMZqXVAtyDg1RBGq9xQiB3X7lR5DX1n2+CyJIeqCEPPAkAAAB4eyJvcmlnaW4iOiJjaHJvbWUtZXh0ZW5zaW9uOi8vYmpadG1qb2NtbmVwZW5tYmxja2luaGxuaGxnZWFkZ25uanVsIiwiaXNTdWJkb21haW4iOnRydWUsImlzVGhpcmRQYXJ0eSI6dHJ1ZSwiZmVhdHVyZSI6IkFJU3VtbWFyaXphdGlvbkFQSSIsImV4cGlyeSI6MTc1MzkyMDAwMH0="
+  ]
 }

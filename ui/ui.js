@@ -15,17 +15,23 @@ document.addEventListener('DOMContentLoaded', () => {
   const resultContent = document.getElementById('resultContent');
   const copyResponseButton = document.getElementById('copyResponseButton'); // Added
   const toggleUrlsLink = document.getElementById('toggleUrlsLink');
+  const saveTabsButton = document.getElementById('saveTabsButton');
+  const viewSavedButton = document.getElementById('viewSavedButton');
+  const closeTabsCheckbox = document.getElementById('closeTabsAfterSave');
 
   // Settings form elements
   const apiKeyInput = document.getElementById('apiKey');
+  const geminiApiKeyInput = document.getElementById('geminiApiKey');
   const rateLimitInput = document.getElementById('rateLimit');
   const maxTabsInput = document.getElementById('maxTabs');
+  const enableSummariesInput = document.getElementById('enableSummaries');
   const saveButton = document.getElementById('saveButton');
   const statusElement = document.getElementById('status');
   const apiKeyValidationElement = document.getElementById('apiKeyValidation');
+  const geminiApiKeyValidationElement = document.getElementById('geminiApiKeyValidation');
 
   // --- State Variables ---
-  let currentSettings = { apiKey: null, maxTabs: 10 }; // Store loaded settings
+  let currentSettings = { apiKey: null, maxTabs: 10, enableSummaries: true }; // Store loaded settings
   let isRateLimited = false; // Track rate limit status
 
 
@@ -98,8 +104,14 @@ document.addEventListener('DOMContentLoaded', () => {
     showSpinner(true);
 
     try {
-      // 1. Load settings (API Key, maxTabs)
-      currentSettings = await chrome.storage.sync.get({ apiKey: '', maxTabs: 10 });
+      // 1. Load settings (API Keys, summaryMethod, maxTabs, enableSummaries)
+      currentSettings = await chrome.storage.sync.get({ 
+        apiKey: '', 
+        geminiApiKey: '',
+        summaryMethod: 'chrome',
+        maxTabs: 10, 
+        enableSummaries: true 
+      });
 
       // 2. Check API Key
       if (!currentSettings.apiKey) {
@@ -116,6 +128,8 @@ document.addEventListener('DOMContentLoaded', () => {
       queryInput.addEventListener('input', handleQueryValidation);
       submitButton.addEventListener('click', handleSubmit);
       toggleUrlsLink.addEventListener('click', handleToggleUrls);
+      saveTabsButton.addEventListener('click', handleSaveTabs);
+      viewSavedButton.addEventListener('click', handleViewSaved);
 
       // Keyboard shortcut: Cmd+Enter (Mac) or Ctrl+Enter (Win/Linux) to submit if input is valid
       queryInput.addEventListener('keydown', (event) => {
@@ -184,7 +198,13 @@ document.addEventListener('DOMContentLoaded', () => {
       const allTabs = await chrome.tabs.query({});
       let relevantTabs = allTabs
         .filter(tab => tab.url && (tab.url.startsWith('http:') || tab.url.startsWith('https:')))
-        .map(tab => ({ url: tab.url, title: tab.title || tab.url })); // Use URL as title if missing
+        .map(tab => ({ 
+          id: tab.id,
+          url: tab.url, 
+          title: tab.title || tab.url,
+          summary: null, // Will be populated by background script
+          enableSummaries: currentSettings.enableSummaries
+        })); // Include tab ID for content extraction
 
       // 2. Limit Tabs
       const originalTabCount = relevantTabs.length;
@@ -195,28 +215,18 @@ document.addEventListener('DOMContentLoaded', () => {
         showStatus(`Using ${relevantTabs.length} tabs...`, 'info');
       }
 
-      // 3. Display Used Tabs (update UI list)
+      // 3. Prepare UI for updates
       tabCountEl.textContent = relevantTabs.length;
       urlListItems.innerHTML = ''; // Clear previous list
-      if (relevantTabs.length > 0) {
-          relevantTabs.forEach(tab => {
-            const li = document.createElement('li');
-            li.textContent = `${tab.title} (${tab.url})`;
-            li.title = `${tab.title}\n${tab.url}`; // Tooltip for full URL/title
-            urlListItems.appendChild(li);
-          });
-          // Don't show the list yet, wait for toggle click
-      } else {
-          urlListItems.innerHTML = '<li>No relevant tabs found or used.</li>';
-      }
+      showStatus('Extracting content from tabs...', 'info');
 
 
       // 4. Send to Background Script
-      showStatus('Sending query to Perplexity...', 'info');
+      showStatus('Processing tabs and sending query to Perplexity...', 'info');
       const response = await chrome.runtime.sendMessage({
         action: 'processQuery',
         query: query,
-        tabUrls: relevantTabs // Send the filtered/limited list
+        tabUrls: relevantTabs // Send the filtered/limited list with IDs
       });
 
       // 5. Handle Response
@@ -230,6 +240,35 @@ document.addEventListener('DOMContentLoaded', () => {
         copyResponseButton.removeEventListener('click', handleCopyResponse); // Remove previous if any
         copyResponseButton.addEventListener('click', handleCopyResponse);
         showStatus('Query successful!', 'success');
+        
+        // Update the tab list with summaries if available
+        if (response.processedTabs) {
+          urlListItems.innerHTML = ''; // Clear previous list
+          response.processedTabs.forEach((tab, index) => {
+            const li = document.createElement('li');
+            const tabInfo = document.createElement('div');
+            tabInfo.className = 'tab-info';
+            
+            const titleDiv = document.createElement('div');
+            titleDiv.className = 'tab-title';
+            titleDiv.textContent = `${index + 1}. ${tab.title}`;
+            
+            const urlDiv = document.createElement('div');
+            urlDiv.className = 'tab-url';
+            urlDiv.textContent = tab.url;
+            
+            const summaryDiv = document.createElement('div');
+            summaryDiv.className = 'tab-summary';
+            summaryDiv.textContent = `Summary: ${tab.summary || 'Processing...'}`;
+            
+            tabInfo.appendChild(titleDiv);
+            tabInfo.appendChild(urlDiv);
+            tabInfo.appendChild(summaryDiv);
+            li.appendChild(tabInfo);
+            
+            urlListItems.appendChild(li);
+          });
+        }
 
         // Increment rate limit count AFTER successful request
         await incrementRequestCount();
@@ -323,11 +362,30 @@ document.addEventListener('DOMContentLoaded', () => {
     return validationResult.valid;
   }
 
+  function handleGeminiKeyValidation() {
+    const geminiKey = geminiApiKeyInput.value;
+    const selectedMethod = document.querySelector('input[name="summaryMethod"]:checked')?.value;
+    
+    // Only validate if Gemini is selected
+    if (selectedMethod === 'gemini' && !geminiKey) {
+      geminiApiKeyValidationElement.textContent = 'Gemini API key required when using Gemini summaries';
+      geminiApiKeyValidationElement.classList.add('error');
+      return false;
+    } else {
+      geminiApiKeyValidationElement.textContent = '';
+      geminiApiKeyValidationElement.classList.remove('error');
+      return true;
+    }
+  }
+
   function loadSettings() {
     chrome.storage.sync.get({
       apiKey: '',
+      geminiApiKey: '',
+      summaryMethod: 'chrome',
       rateLimit: 10,
-      maxTabs: 10
+      maxTabs: 10,
+      enableSummaries: true
     }, (items) => {
       if (chrome.runtime.lastError) {
         console.error("Error loading settings:", chrome.runtime.lastError);
@@ -335,30 +393,53 @@ document.addEventListener('DOMContentLoaded', () => {
         return;
       }
       apiKeyInput.value = items.apiKey;
+      geminiApiKeyInput.value = items.geminiApiKey;
       rateLimitInput.value = items.rateLimit;
       maxTabsInput.value = items.maxTabs;
+      enableSummariesInput.checked = items.enableSummaries;
+      
+      // Set the selected summary method
+      const methodRadio = document.querySelector(`input[name="summaryMethod"][value="${items.summaryMethod}"]`);
+      if (methodRadio) {
+        methodRadio.checked = true;
+      }
+      
       handleApiKeyValidation();
+      handleGeminiKeyValidation();
     });
   }
 
   function saveSettings() {
     if (!handleApiKeyValidation()) {
-      showSettingsStatus('Cannot save: Invalid API key format', 'error');
+      showSettingsStatus('Cannot save: Invalid Perplexity API key format', 'error');
       apiKeyInput.focus();
       return;
     }
 
     const apiKey = apiKeyInput.value.trim();
+    const geminiApiKey = geminiApiKeyInput.value.trim();
+    const summaryMethod = document.querySelector('input[name="summaryMethod"]:checked').value;
     const rateLimit = Math.min(Math.max(parseInt(rateLimitInput.value, 10) || 10, 1), 100);
     const maxTabs = Math.min(Math.max(parseInt(maxTabsInput.value, 10) || 10, 1), 50);
+    const enableSummaries = enableSummariesInput.checked;
+
+    // Validate Gemini key if that method is selected
+    if (summaryMethod === 'gemini' && !geminiApiKey) {
+      showSettingsStatus('Cannot save: Gemini API key required when using Gemini summaries', 'error');
+      geminiApiKeyInput.focus();
+      return;
+    }
 
     rateLimitInput.value = rateLimit;
     maxTabsInput.value = maxTabs;
 
     chrome.storage.sync.set({
       apiKey,
+      geminiApiKey,
+      summaryMethod,
       rateLimit,
-      maxTabs
+      maxTabs,
+      enableSummaries
     }, () => {
       if (chrome.runtime.lastError) {
         console.error("Error saving settings:", chrome.runtime.lastError);
@@ -379,7 +460,99 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   apiKeyInput.addEventListener('input', handleApiKeyValidation);
+  geminiApiKeyInput.addEventListener('input', handleGeminiKeyValidation);
   saveButton.addEventListener('click', saveSettings);
+  
+  // Add listeners for summary method radio buttons
+  document.querySelectorAll('input[name="summaryMethod"]').forEach(radio => {
+    radio.addEventListener('change', handleGeminiKeyValidation);
+  });
+  
   loadSettings();
+
+  // --- Save Tabs Functionality ---
+  async function handleSaveTabs() {
+    showStatus('Saving tabs...', 'info');
+    showSpinner(true);
+    
+    try {
+      // 1. Get all tabs
+      const allTabs = await chrome.tabs.query({});
+      const relevantTabs = allTabs.filter(tab => 
+        tab.url && (tab.url.startsWith('http:') || tab.url.startsWith('https:'))
+      );
+      
+      // 2. Extract content and generate summaries if enabled
+      const settings = await chrome.storage.sync.get({ apiKey: '', enableSummaries: true });
+      const tabsWithSummaries = [];
+      
+      for (const tab of relevantTabs) {
+        showStatus(`Processing tab ${tabsWithSummaries.length + 1}/${relevantTabs.length}...`, 'info');
+        
+        const tabData = {
+          id: tab.id,
+          url: tab.url,
+          title: tab.title || tab.url,
+          summary: null
+        };
+        
+        if (settings.enableSummaries && settings.apiKey) {
+          try {
+            // Send message to background script to get content and summary
+            const response = await chrome.runtime.sendMessage({
+              action: 'extractAndSummarize',
+              tab: tab
+            });
+            
+            if (response && response.summary) {
+              tabData.summary = response.summary;
+            }
+          } catch (error) {
+            console.error('Error getting summary for tab:', error);
+            tabData.summary = 'Failed to generate summary';
+          }
+        }
+        
+        tabsWithSummaries.push(tabData);
+      }
+      
+      // 3. Save the session
+      const session = {
+        timestamp: Date.now(),
+        name: `Session ${new Date().toLocaleString()}`,
+        tabs: tabsWithSummaries
+      };
+      
+      // Get existing sessions
+      const result = await chrome.storage.local.get('savedSessions');
+      const sessions = result.savedSessions || [];
+      sessions.push(session);
+      
+      // Save to storage
+      await chrome.storage.local.set({ savedSessions: sessions });
+      
+      showStatus(`Saved ${tabsWithSummaries.length} tabs successfully!`, 'success');
+      
+      // 4. Close tabs if option is checked
+      if (closeTabsCheckbox.checked) {
+        showStatus('Closing tabs...', 'info');
+        for (const tab of relevantTabs) {
+          await chrome.tabs.remove(tab.id);
+        }
+        showStatus('Tabs saved and closed!', 'success');
+      }
+      
+    } catch (error) {
+      console.error('Error saving tabs:', error);
+      showStatus(`Error: ${error.message}`, 'error');
+    } finally {
+      showSpinner(false);
+    }
+  }
+  
+  async function handleViewSaved() {
+    // Open saved tabs page
+    chrome.tabs.create({ url: chrome.runtime.getURL('ui/saved-tabs.html') });
+  }
 
 });

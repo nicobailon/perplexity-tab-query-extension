@@ -1,0 +1,145 @@
+/* Saved Tabs Page Styles */
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  margin: 0;
+  padding: 0;
+  background-color: #f8f9fa;
+  color: #202124;
+}
+
+.container {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+h1 {
+  color: #1a73e8;
+  margin-bottom: 30px;
+}
+
+.loading, .no-sessions {
+  text-align: center;
+  padding: 40px;
+  font-size: 16px;
+  color: #5f6368;
+}
+
+.sessions-list {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.session-card {
+  background: white;
+  border: 1px solid #dadce0;
+  border-radius: 8px;
+  padding: 20px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.session-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+  border-bottom: 1px solid #e8eaed;
+  padding-bottom: 10px;
+}
+
+.session-title {
+  font-size: 18px;
+  font-weight: 500;
+  color: #202124;
+}
+
+.session-date {
+  font-size: 14px;
+  color: #5f6368;
+}
+
+.session-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.session-actions button {
+  background-color: #1a73e8;
+  color: white;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 13px;
+  transition: background-color 0.2s;
+}
+
+.session-actions button:hover {
+  background-color: #1765cc;
+}
+
+.session-actions button.delete {
+  background-color: #d93025;
+}
+
+.session-actions button.delete:hover {
+  background-color: #b92318;
+}
+
+.tabs-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 15px;
+  margin-top: 15px;
+}
+
+.tab-item {
+  background-color: #f8f9fa;
+  border: 1px solid #e8eaed;
+  border-radius: 6px;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.tab-title {
+  font-weight: 500;
+  font-size: 14px;
+  color: #202124;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.tab-url {
+  font-size: 12px;
+  color: #5f6368;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  display: block;
+  text-decoration: none;
+}
+
+.tab-url:hover {
+  color: #1a73e8;
+  text-decoration: underline;
+}
+
+.tab-summary {
+  font-size: 12px;
+  color: #3c4043;
+  line-height: 1.4;
+  max-height: 60px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+}
+
+.hidden {
+  display: none !important;
+}
